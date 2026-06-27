@@ -25,6 +25,8 @@
   ::selection{background:#e8112d;color:#fff}
   aside::-webkit-scrollbar{width:8px}
   aside::-webkit-scrollbar-thumb{background:#26262c;border-radius:4px}
+  :fullscreen,:-webkit-full-screen{align-items:center !important;justify-content:center !important;max-width:none !important;max-height:none !important;padding:0 !important;border:none !important;background:#000 !important}
+  :fullscreen canvas,:-webkit-full-screen canvas{max-width:100vw !important;max-height:100vh !important}
 </style>
 </helmet>
 <div style="display:flex;height:100vh;width:100%;background:#0d0d0f;color:#eaeaea;font-family:'IBM Plex Mono',monospace;overflow:hidden">
@@ -51,22 +53,23 @@
         <button onClick="{{ mRings }}" style="{{ sMRings }}">Rings</button>
         <button onClick="{{ mSpiral }}" style="{{ sMSpiral }}">Spiral</button>
       </div>
-      <div style="display:flex;gap:7px">
-        <button onClick="{{ regen }}" style="flex:2;padding:11px;background:#e8112d;color:#fff;border:none;font-family:inherit;font-size:11px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;cursor:pointer">↻ Generate</button>
-        <button onClick="{{ mutate }}" style="flex:1;padding:11px;background:transparent;color:#eaeaea;border:1px solid #2a2a30;font-family:inherit;font-size:11px;letter-spacing:.08em;text-transform:uppercase;cursor:pointer">Mutate</button>
-      </div>
-      <button onClick="{{ openVar }}" style="width:100%;padding:9px;background:transparent;color:#cfcfd6;border:1px solid #26262c;font-family:inherit;font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;cursor:pointer">▦ Variations · seed {{ seedHex }}</button>
+      
     </div>
 
-    <div style="display:flex;flex-wrap:wrap;gap:4px;border-top:1px solid #1c1c20;border-bottom:1px solid #1c1c20;padding:11px 0">
-      <button onClick="{{ tField }}" style="{{ sTField }}">Field</button>
-      <button onClick="{{ tShapes }}" style="{{ sTShapes }}">Shapes</button>
-      <button onClick="{{ tPipes }}" style="{{ sTPipes }}">Pipes</button>
-      <button onClick="{{ tLines }}" style="{{ sTLines }}">Lines</button>
-      <button onClick="{{ tMotion }}" style="{{ sTMotion }}">Motion</button>
-      <button onClick="{{ tFrame }}" style="{{ sTFrame }}">Frame</button>
-      <button onClick="{{ tColor }}" style="{{ sTColor }}">Color</button>
-      <button onClick="{{ tExport }}" style="{{ sTExport }}">Export</button>
+    <div style="border-top:1px solid #1c1c20;border-bottom:1px solid #1c1c20;padding:11px 0;display:flex;flex-direction:column;gap:10px">
+      <div style="display:flex;gap:5px">
+        <button onClick="{{ goBuild }}" style="{{ sStageBuild }}">Build</button>
+        <button onClick="{{ goMotion }}" style="{{ sStageMotion }}">Motion</button>
+        <button onClick="{{ goExport }}" style="{{ sStageExport }}">Export</button>
+      </div>
+      <div style="{{ subTabsWrap }}">
+        <button onClick="{{ tField }}" style="{{ sTField }}">Field</button>
+        <button onClick="{{ tShapes }}" style="{{ sTShapes }}">Shapes</button>
+        <button onClick="{{ tPipes }}" style="{{ sTPipes }}">Pipes</button>
+        <button onClick="{{ tLines }}" style="{{ sTLines }}">Lines</button>
+        <button onClick="{{ tFrame }}" style="{{ sTFrame }}">Frame</button>
+        <button onClick="{{ tColor }}" style="{{ sTColor }}">Color</button>
+      </div>
     </div>
 
     <!-- FIELD -->
@@ -292,8 +295,14 @@
   </aside>
 
   <main style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;padding:28px;min-width:0;position:relative">
-    <div style="padding:12px;background:#000;border:1px solid #1c1c20;box-shadow:0 24px 80px rgba(0,0,0,.6);max-width:100%;max-height:88vh;display:flex">
+    <div style="position:relative;padding:12px;background:#000;border:1px solid #1c1c20;box-shadow:0 24px 80px rgba(0,0,0,.6);max-width:100%;max-height:88vh;display:flex">
       <canvas id="tap2-canvas" ref="{{ canvasRef }}" style="display:block;max-width:100%;max-height:84vh;image-rendering:pixelated;background:#000"></canvas>
+      <button onClick="{{ goFull }}" title="Fullscreen" style="position:absolute;top:18px;right:18px;width:30px;height:30px;display:flex;align-items:center;justify-content:center;background:rgba(10,10,12,.7);color:#cfcfd6;border:1px solid #2a2a30;border-radius:2px;font-size:14px;cursor:pointer;font-family:'IBM Plex Mono',monospace">⛶</button>
+    </div>
+    <div style="display:flex;gap:8px;width:100%;max-width:520px">
+      <button onClick="{{ regen }}" style="flex:2;padding:12px;background:#e8112d;color:#fff;border:none;font-family:'IBM Plex Mono',monospace;font-size:11px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;cursor:pointer;border-radius:2px">↻ Generate</button>
+      <button onClick="{{ mutate }}" style="flex:1;padding:12px;background:transparent;color:#eaeaea;border:1px solid #2a2a30;font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:.08em;text-transform:uppercase;cursor:pointer;border-radius:2px">Mutate</button>
+      <button onClick="{{ openVar }}" style="flex:1;padding:12px;background:transparent;color:#cfcfd6;border:1px solid #26262c;font-family:'IBM Plex Mono',monospace;font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;cursor:pointer;border-radius:2px">▦ Variations</button>
     </div>
     <div style="font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:#6f6f78">{{ modeLabel }} · {{ symLabel }} · {{ shapeLabel }} · {{ dimLabel }} · seed {{ seedHex }}</div>
 
@@ -385,7 +394,7 @@ class Component extends DCLogic {
       seed:(Math.random()*1e9)|0,
       animOn:false, animSpeed:50, animChurn:true, animRotate:true, animFlow:true, animThreadMove:false, recording:false, gifBusy:false, gifProg:0, gifSize:'medium',
       gifTurns:'auto', grainAnim:false, grainTarget:28,
-      tab:'field', showVar:false, copyLbl:'Copy link',
+      tab:'field', buildTab:'field', showVar:false, copyLbl:'Copy link',
     };
     return Object.assign(base, fromHash||{});
   }
@@ -830,7 +839,9 @@ class Component extends DCLogic {
   segS(active){ const base={flex:'1',padding:'8px 0',fontFamily:"'IBM Plex Mono',monospace",fontSize:'11px',cursor:'pointer',borderRadius:'2px'};
     return active?{...base,border:'1px solid #f4f4f0',background:'#f4f4f0',color:'#0a0a0c'}:{...base,border:'1px solid #26262c',background:'transparent',color:'#cfcfd6'}; }
   tabS(active){ const base={padding:'6px 9px',fontFamily:"'IBM Plex Mono',monospace",fontSize:'10px',letterSpacing:'.05em',textTransform:'uppercase',cursor:'pointer',borderRadius:'2px',border:'1px solid transparent'};
-    return active?{...base,background:'#1a1a1f',color:'#f4f4f0',border:'1px solid #2a2a30'}:{...base,background:'transparent',color:'#7a7a82'}; }
+    return active?{...base,background:'#26262c',color:'#f4f4f0',border:'1px solid #e8112d'}:{...base,background:'transparent',color:'#6a6a72'}; }
+  stageS(active){ const base={flex:'1',padding:'9px 8px',fontFamily:"'IBM Plex Mono',monospace",fontSize:'11px',fontWeight:'600',letterSpacing:'.1em',textTransform:'uppercase',cursor:'pointer',borderRadius:'2px'};
+    return active?{...base,background:'#e8112d',color:'#fff',border:'1px solid #e8112d'}:{...base,background:'transparent',color:'#9a9aa2',border:'1px solid #26262c'}; }
   chip(active){ const base={padding:'7px 11px',fontFamily:"'IBM Plex Mono',monospace",fontSize:'10.5px',letterSpacing:'.05em',cursor:'pointer',borderRadius:'2px'};
     return active?{...base,border:'1px solid #e8112d',background:'rgba(232,17,45,.14)',color:'#f4f4f0'}:{...base,border:'1px solid #26262c',background:'transparent',color:'#8c8c95'}; }
   toggle(on){ const base={padding:'5px 12px',fontFamily:"'IBM Plex Mono',monospace",fontSize:'10px',letterSpacing:'.08em',cursor:'pointer',borderRadius:'2px'};
@@ -862,6 +873,10 @@ class Component extends DCLogic {
       // tab styles + panels
       sTField:this.tabS(s.tab==='field'), sTShapes:this.tabS(s.tab==='shapes'), sTPipes:this.tabS(s.tab==='pipes'), sTLines:this.tabS(s.tab==='lines'), sTFrame:this.tabS(s.tab==='frame'), sTColor:this.tabS(s.tab==='color'), sTExport:this.tabS(s.tab==='export'), sTMotion:this.tabS(s.tab==='motion'),
       panField:this.pan(s.tab==='field'), panShapes:this.pan(s.tab==='shapes'), panPipes:this.pan(s.tab==='pipes'), panLines:this.pan(s.tab==='lines'), panFrame:this.pan(s.tab==='frame'), panColor:this.pan(s.tab==='color'), panExport:this.pan(s.tab==='export'), panMotion:this.pan(s.tab==='motion'),
+      sStageBuild:this.stageS(['field','shapes','pipes','lines','frame','color'].includes(s.tab)), sStageMotion:this.stageS(s.tab==='motion'), sStageExport:this.stageS(s.tab==='export'),
+      subTabsWrap: ['field','shapes','pipes','lines','frame','color'].includes(s.tab) ? {display:'flex',flexWrap:'wrap',gap:'4px'} : {display:'none'},
+      goBuild:()=>this.up({tab:this.state.buildTab||'field'}), goMotion:()=>this.up({tab:'motion'}), goExport:()=>this.up({tab:'export'}),
+      goFull:()=>{ const cv=this.canvasRef.current; if(!cv) return; const el=cv.parentElement||cv; const fs=document.fullscreenElement||document.webkitFullscreenElement; if(fs){ const ex=document.exitFullscreen||document.webkitExitFullscreen; if(ex) ex.call(document); } else { const rq=el.requestFullscreen||el.webkitRequestFullscreen; if(rq) rq.call(el); } },
       animSpeed:s.animSpeed, animOnLbl:s.animOn?'❚❚ Pause':'▶ Play',
       sAnimBtn:{width:'100%',padding:'13px',background:s.animOn?'#34c759':'#e8112d',color:s.animOn?'#06210f':'#fff',border:'none',fontFamily:"'IBM Plex Mono',monospace",fontSize:'12px',fontWeight:'600',letterSpacing:'.1em',textTransform:'uppercase',cursor:'pointer'},
       sAnimChurn:this.toggle(s.animChurn), sAnimRotate:this.toggle(s.animRotate), sAnimFlow:this.toggle(s.animFlow), sThreadMove:this.toggle(s.animThreadMove),
@@ -883,7 +898,7 @@ class Component extends DCLogic {
       // handlers: modes
       mDrift:()=>this.up({mode:'drift',sym:'none'}), mMandala:()=>this.up({mode:'mandala',sym:'8'}), mStrata:()=>this.up({mode:'strata',sym:'none'}), mRings:()=>this.up({mode:'rings',sym:'mirror'}), mSpiral:()=>this.up({mode:'spiral',sym:'none'}),
       // tabs
-      tField:()=>this.up({tab:'field'}), tShapes:()=>this.up({tab:'shapes'}), tPipes:()=>this.up({tab:'pipes'}), tLines:()=>this.up({tab:'lines'}), tFrame:()=>this.up({tab:'frame'}), tColor:()=>this.up({tab:'color'}), tExport:()=>this.up({tab:'export'}),
+      tField:()=>this.up({tab:'field',buildTab:'field'}), tShapes:()=>this.up({tab:'shapes',buildTab:'shapes'}), tPipes:()=>this.up({tab:'pipes',buildTab:'pipes'}), tLines:()=>this.up({tab:'lines',buildTab:'lines'}), tFrame:()=>this.up({tab:'frame',buildTab:'frame'}), tColor:()=>this.up({tab:'color',buildTab:'color'}), tExport:()=>this.up({tab:'export'}),
       // field
       onAspect:e=>this.up({aspect:e.target.value}), onShape:e=>this.up({shapeMask:e.target.value}), onSym:e=>this.up({sym:e.target.value}),
       onGrain:e=>this.up({grain:num(e)}), onVoid:e=>this.up({voidness:num(e)}), onContrast:e=>this.up({contrast:num(e)}),
