@@ -220,6 +220,10 @@
       <p style="font-size:10px;line-height:1.6;color:#5a5a62;letter-spacing:.04em">Grain eases from your Field <b style="color:#9a9aa2">Grain</b> (the initial) out to this target and back, once per loop — a zoom / detail breathing effect that stays seamless.</p>
       <div style="height:1px;background:#1c1c20;margin:2px 0"></div>
       <button onClick="{{ recordLoop }}" style="width:100%;padding:11px;background:transparent;color:#eaeaea;border:1px solid #2a2a30;font-family:inherit;font-size:11px;letter-spacing:.08em;text-transform:uppercase;cursor:pointer">{{ recLbl }}</button>
+      <div style="display:flex;flex-direction:column;gap:7px">
+        <div style="font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:#8c8c95">GIF size</div>
+        <select value="{{ gifSize }}" onChange="{{ onGifSize }}"><option value="default">Default · small file</option><option value="medium">Medium</option><option value="large">Large · sharpest, big file</option></select>
+      </div>
       <button onClick="{{ exportGif }}" style="width:100%;padding:11px;background:transparent;color:#eaeaea;border:1px solid #2a2a30;font-family:inherit;font-size:11px;letter-spacing:.08em;text-transform:uppercase;cursor:pointer">{{ gifLbl }}</button>
       <p style="font-size:10px;line-height:1.6;color:#5a5a62;letter-spacing:.04em;margin-top:2px"><b style="color:#9a9aa2">WebM</b> records ~6s of the live canvas (works offline). <b style="color:#9a9aa2">GIF</b> renders a true <b style="color:#9a9aa2">seamless loop</b> (30 frames, ~460px) — for n-fold mandalas it rotates exactly one symmetry step so the loop is invisible. Tip: lower Grain for smaller files.</p>
     </section>
@@ -379,7 +383,7 @@ class Component extends DCLogic {
       frameStyle:'none', frameCount:1, frameThick:24, frameColor:'light',
       palColors:['#1f5fc4','#e8112d','#f6c200','#138a3e','#f4f4f0'], palBg:'#000000', palLight:'#f4f4f0',
       seed:(Math.random()*1e9)|0,
-      animOn:false, animSpeed:50, animChurn:true, animRotate:true, animFlow:true, animThreadMove:false, recording:false, gifBusy:false, gifProg:0,
+      animOn:false, animSpeed:50, animChurn:true, animRotate:true, animFlow:true, animThreadMove:false, recording:false, gifBusy:false, gifProg:0, gifSize:'medium',
       gifTurns:'auto', grainAnim:false, grainTarget:28,
       tab:'field', showVar:false, copyLbl:'Copy link',
     };
@@ -748,7 +752,8 @@ class Component extends DCLogic {
     const rotSpan=this.state.animRotate ? turns*2*Math.PI : 0;
     const enc=GIFEncoder();
     const G0=this.geom(base);
-    const SW=Math.min(G0.W,860), SH=Math.round(G0.H*SW/G0.W);
+    const gifCap = this.state.gifSize==='large' ? 2000 : (this.state.gifSize==='default' ? 560 : 900);
+    const SW=Math.min(G0.W,gifCap), SH=Math.round(G0.H*SW/G0.W);
     const oc=document.createElement('canvas');
     const sc=document.createElement('canvas'); sc.width=SW; sc.height=SH;
     const sctx=sc.getContext('2d'); sctx.imageSmoothingEnabled=false;
@@ -865,7 +870,7 @@ class Component extends DCLogic {
       tMotion:()=>this.up({tab:'motion'}), toggleAnim:()=>this.toggleAnim(), onAnimSpeed:e=>this.up({animSpeed:num(e)}),
       tgChurn:()=>this.up({animChurn:!s.animChurn}), tgRotate:()=>this.up({animRotate:!s.animRotate}), tgFlow:()=>this.up({animFlow:!s.animFlow}), tgThreadMove:()=>this.up({animThreadMove:!s.animThreadMove}),
       recordLoop:()=>this.recordLoop(),
-      exportGif:()=>this.exportGif(),
+      exportGif:()=>this.exportGif(), gifSize:s.gifSize, onGifSize:e=>this.up({gifSize:e.target.value}),
       gifLbl: s.gifBusy ? ('● Rendering '+Math.round(s.gifProg*100)+'%') : '◆ Export loop (GIF)',
       gifTurns:s.gifTurns, onTurns:e=>this.up({gifTurns:e.target.value}),
       sGrainAnim:this.toggle(s.grainAnim), grainAnimLbl:s.grainAnim?'ON':'OFF', tgGrainAnim:()=>this.up({grainAnim:!s.grainAnim}),
