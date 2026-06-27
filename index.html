@@ -1,0 +1,931 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{height:100%}
+  body{background:#0d0d0f}
+  input[type=range]{-webkit-appearance:none;appearance:none;width:100%;height:3px;background:#26262c;border-radius:2px;outline:none}
+  input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:13px;height:13px;border-radius:50%;background:#f4f4f0;cursor:pointer;border:2px solid #0a0a0c}
+  input[type=range]::-moz-range-thumb{width:13px;height:13px;border-radius:50%;background:#f4f4f0;cursor:pointer;border:2px solid #0a0a0c}
+  select{-webkit-appearance:none;appearance:none;width:100%;background:#141417;color:#eaeaea;border:1px solid #26262c;border-radius:2px;padding:8px 10px;font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:.04em;cursor:pointer}
+  input[type=color]{-webkit-appearance:none;appearance:none;border:none;padding:0;background:none;cursor:pointer}
+  input[type=color]::-webkit-color-swatch-wrapper{padding:0}
+  input[type=color]::-webkit-color-swatch{border:1px solid #2a2a30;border-radius:2px}
+  ::selection{background:#e8112d;color:#fff}
+  aside::-webkit-scrollbar{width:8px}
+  aside::-webkit-scrollbar-thumb{background:#26262c;border-radius:4px}
+</style>
+</helmet>
+<div style="display:flex;height:100vh;width:100%;background:#0d0d0f;color:#eaeaea;font-family:'IBM Plex Mono',monospace;overflow:hidden">
+
+  <aside style="width:332px;flex-shrink:0;height:100%;overflow-y:auto;border-right:1px solid #1c1c20;background:#0a0a0c;padding:22px 20px;display:flex;flex-direction:column;gap:20px">
+
+    <header style="display:flex;flex-direction:column;gap:8px">
+      <div style="display:flex;align-items:center;gap:7px">
+        <div style="width:13px;height:13px;background:#e8112d"></div>
+        <div style="width:13px;height:13px;background:#1f5fc4"></div>
+        <div style="width:13px;height:13px;background:#f6c200"></div>
+        <div style="width:13px;height:13px;background:#138a3e"></div>
+        <h1 style="font-family:'Space Grotesk',sans-serif;font-size:18px;font-weight:600;color:#f4f4f0;margin-left:4px">Pixel Tapestry</h1>
+        <span style="font-size:9px;letter-spacing:.1em;color:#5a5a62;border:1px solid #26262c;padding:2px 5px;border-radius:2px">v2</span>
+      </div>
+      <p style="font-size:10px;letter-spacing:.2em;text-transform:uppercase;color:#6f6f78">Generative glyph-field studio</p>
+    </header>
+
+    <div style="display:flex;flex-direction:column;gap:10px">
+      <div style="display:flex;flex-wrap:wrap;gap:5px">
+        <button onClick="{{ mDrift }}" style="{{ sMDrift }}">Drift</button>
+        <button onClick="{{ mMandala }}" style="{{ sMMandala }}">Mandala</button>
+        <button onClick="{{ mStrata }}" style="{{ sMStrata }}">Strata</button>
+        <button onClick="{{ mRings }}" style="{{ sMRings }}">Rings</button>
+        <button onClick="{{ mSpiral }}" style="{{ sMSpiral }}">Spiral</button>
+      </div>
+      <div style="display:flex;gap:7px">
+        <button onClick="{{ regen }}" style="flex:2;padding:11px;background:#e8112d;color:#fff;border:none;font-family:inherit;font-size:11px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;cursor:pointer">↻ Generate</button>
+        <button onClick="{{ mutate }}" style="flex:1;padding:11px;background:transparent;color:#eaeaea;border:1px solid #2a2a30;font-family:inherit;font-size:11px;letter-spacing:.08em;text-transform:uppercase;cursor:pointer">Mutate</button>
+      </div>
+      <button onClick="{{ openVar }}" style="width:100%;padding:9px;background:transparent;color:#cfcfd6;border:1px solid #26262c;font-family:inherit;font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;cursor:pointer">▦ Variations · seed {{ seedHex }}</button>
+    </div>
+
+    <div style="display:flex;flex-wrap:wrap;gap:4px;border-top:1px solid #1c1c20;border-bottom:1px solid #1c1c20;padding:11px 0">
+      <button onClick="{{ tField }}" style="{{ sTField }}">Field</button>
+      <button onClick="{{ tShapes }}" style="{{ sTShapes }}">Shapes</button>
+      <button onClick="{{ tPipes }}" style="{{ sTPipes }}">Pipes</button>
+      <button onClick="{{ tLines }}" style="{{ sTLines }}">Lines</button>
+      <button onClick="{{ tMotion }}" style="{{ sTMotion }}">Motion</button>
+      <button onClick="{{ tFrame }}" style="{{ sTFrame }}">Frame</button>
+      <button onClick="{{ tColor }}" style="{{ sTColor }}">Color</button>
+      <button onClick="{{ tExport }}" style="{{ sTExport }}">Export</button>
+    </div>
+
+    <!-- FIELD -->
+    <section style="{{ panField }}">
+      <div style="display:flex;flex-direction:column;gap:7px">
+        <div style="font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:#8c8c95">Aspect ratio</div>
+        <select value="{{ aspect }}" onChange="{{ onAspect }}"><option value="square">Square 1:1</option><option value="portrait">Portrait 3:4</option><option value="landscape">Landscape 4:3</option><option value="banner">Banner 2:1</option></select>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:7px">
+        <div style="font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:#8c8c95">Output shape</div>
+        <select value="{{ shapeMask }}" onChange="{{ onShape }}"><option value="rect">Rectangle</option><option value="circle">Circle / Oval</option><option value="diamond">Diamond</option><option value="hex">Hexagon</option><option value="arch">Arch</option></select>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:7px">
+        <div style="font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:#8c8c95">Symmetry</div>
+        <select value="{{ sym }}" onChange="{{ onSym }}"><option value="none">None</option><option value="mirror">Mirror</option><option value="4">4-fold</option><option value="6">6-fold</option><option value="8">8-fold</option><option value="12">12-fold</option></select>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:8px">
+        <div style="display:flex;justify-content:space-between;font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:#8c8c95"><span>Grain</span><span style="color:#f4f4f0">{{ grain }}</span></div>
+        <input type="range" min="20" max="84" step="1" value="{{ grain }}" onInput="{{ onGrain }}">
+      </div>
+      <div style="display:flex;flex-direction:column;gap:8px">
+        <div style="display:flex;justify-content:space-between;font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:#8c8c95"><span>Void</span><span style="color:#f4f4f0">{{ voidness }}</span></div>
+        <input type="range" min="0" max="100" step="1" value="{{ voidness }}" onInput="{{ onVoid }}">
+      </div>
+      <div style="display:flex;flex-direction:column;gap:8px">
+        <div style="display:flex;justify-content:space-between;font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:#8c8c95"><span>Contrast</span><span style="color:#f4f4f0">{{ contrast }}</span></div>
+        <input type="range" min="0" max="100" step="1" value="{{ contrast }}" onInput="{{ onContrast }}">
+      </div>
+    </section>
+
+    <!-- SHAPES -->
+    <section style="{{ panShapes }}">
+      <div style="display:flex;justify-content:space-between;align-items:center">
+        <span style="font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:#cfcfd6">Glyph layer</span>
+        <button onClick="{{ tgGlyph }}" style="{{ sGlyphOn }}">{{ glyphOnLbl }}</button>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:8px">
+        <div style="display:flex;justify-content:space-between;font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:#8c8c95"><span>Amount</span><span style="color:#f4f4f0">{{ glyphAmount }}</span></div>
+        <input type="range" min="0" max="100" step="1" value="{{ glyphAmount }}" onInput="{{ onGlyphAmt }}">
+      </div>
+      <div style="display:flex;flex-direction:column;gap:8px">
+        <div style="display:flex;justify-content:space-between;font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:#8c8c95"><span>White accent</span><span style="color:#f4f4f0">{{ glyphAccent }}</span></div>
+        <input type="range" min="0" max="100" step="1" value="{{ glyphAccent }}" onInput="{{ onGlyphAcc }}">
+      </div>
+      <div style="display:flex;flex-direction:column;gap:7px">
+        <div style="font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:#8c8c95">Stack per cell</div>
+        <div style="display:flex;gap:5px">
+          <button onClick="{{ stk1 }}" style="{{ sStk1 }}">1</button>
+          <button onClick="{{ stk2 }}" style="{{ sStk2 }}">2</button>
+          <button onClick="{{ stk3 }}" style="{{ sStk3 }}">3</button>
+        </div>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:7px">
+        <div style="font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:#8c8c95">Shape sets</div>
+        <div style="display:flex;flex-wrap:wrap;gap:5px">
+          <button onClick="{{ setBasic }}" style="{{ sSetBasic }}">Basic</button>
+          <button onClick="{{ setFrames }}" style="{{ sSetFrames }}">Frames</button>
+          <button onClick="{{ setTexture }}" style="{{ sSetTexture }}">Texture</button>
+          <button onClick="{{ setGeo }}" style="{{ sSetGeo }}">Geo</button>
+        </div>
+      </div>
+      <div style="display:flex;justify-content:space-between;align-items:center;border-top:1px solid #1c1c20;padding-top:13px">
+        <span style="font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:#cfcfd6">Diagonal slash</span>
+        <button onClick="{{ tgSlash }}" style="{{ sSlashOn }}">{{ slashOnLbl }}</button>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:8px">
+        <div style="display:flex;justify-content:space-between;font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:#8c8c95"><span>Amount</span><span style="color:#f4f4f0">{{ slashAmount }}</span></div>
+        <input type="range" min="0" max="100" step="1" value="{{ slashAmount }}" onInput="{{ onSlashAmt }}">
+      </div>
+    </section>
+
+    <!-- PIPES -->
+    <section style="{{ panPipes }}">
+      <div style="display:flex;justify-content:space-between;align-items:center">
+        <span style="font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:#cfcfd6">Pipes &amp; loops</span>
+        <button onClick="{{ tgPipes }}" style="{{ sPipesOn }}">{{ pipesOnLbl }}</button>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:7px">
+        <div style="font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:#8c8c95">Style</div>
+        <select value="{{ pipesStyle }}" onChange="{{ onPipeStyle }}"><option value="arc">Truchet arcs (loops)</option><option value="maze">Maze diagonals</option><option value="circuit">Circuit traces</option></select>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:8px">
+        <div style="display:flex;justify-content:space-between;font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:#8c8c95"><span>Density</span><span style="color:#f4f4f0">{{ pipesAmount }}</span></div>
+        <input type="range" min="0" max="100" step="1" value="{{ pipesAmount }}" onInput="{{ onPipeAmt }}">
+      </div>
+      <div style="display:flex;flex-direction:column;gap:8px">
+        <div style="display:flex;justify-content:space-between;font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:#8c8c95"><span>Weight</span><span style="color:#f4f4f0">{{ pipesWeight }}</span></div>
+        <input type="range" min="2" max="100" step="1" value="{{ pipesWeight }}" onInput="{{ onPipeW }}">
+      </div>
+      <div style="display:flex;flex-direction:column;gap:7px">
+        <div style="font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:#8c8c95">Color</div>
+        <select value="{{ pipesColor }}" onChange="{{ onPipeColor }}"><option value="light">White / light</option><option value="region">Match region</option><option value="#e8112d">Red</option><option value="#1f5fc4">Blue</option><option value="#f6c200">Yellow</option></select>
+      </div>
+    </section>
+
+    <!-- LINES -->
+    <section style="{{ panLines }}">
+      <div style="display:flex;justify-content:space-between;align-items:center">
+        <span style="font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:#cfcfd6">Threads</span>
+        <button onClick="{{ tgThreads }}" style="{{ sThreadsOn }}">{{ threadsOnLbl }}</button>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:7px">
+        <div style="font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:#8c8c95">Type</div>
+        <select value="{{ threadsType }}" onChange="{{ onThreadType }}"><option value="curve">Flowing curves</option><option value="ortho">Circuit / orthogonal</option><option value="dash">Dashed</option></select>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:8px">
+        <div style="display:flex;justify-content:space-between;font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:#8c8c95"><span>Amount</span><span style="color:#f4f4f0">{{ threadsAmount }}</span></div>
+        <input type="range" min="0" max="100" step="1" value="{{ threadsAmount }}" onInput="{{ onThreadAmt }}">
+      </div>
+      <div style="display:flex;flex-direction:column;gap:8px">
+        <div style="display:flex;justify-content:space-between;font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:#8c8c95"><span>Weight</span><span style="color:#f4f4f0">{{ threadsWeight }}</span></div>
+        <input type="range" min="2" max="100" step="1" value="{{ threadsWeight }}" onInput="{{ onThreadW }}">
+      </div>
+    </section>
+
+    <!-- MOTION -->
+    <section style="{{ panMotion }}">
+      <button onClick="{{ toggleAnim }}" style="{{ sAnimBtn }}">{{ animOnLbl }}</button>
+      <div style="display:flex;flex-direction:column;gap:8px">
+        <div style="display:flex;justify-content:space-between;font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:#8c8c95"><span>Speed</span><span style="color:#f4f4f0">{{ animSpeed }}</span></div>
+        <input type="range" min="0" max="100" step="1" value="{{ animSpeed }}" onInput="{{ onAnimSpeed }}">
+      </div>
+      <div style="display:flex;justify-content:space-between;align-items:center">
+        <span style="font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:#cfcfd6">Field churn</span>
+        <button onClick="{{ tgChurn }}" style="{{ sAnimChurn }}">{{ churnLbl }}</button>
+      </div>
+      <div style="display:flex;justify-content:space-between;align-items:center">
+        <span style="font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:#cfcfd6">Rotate <span style="color:#5a5a62;text-transform:none;letter-spacing:0">· mandala/spiral</span></span>
+        <button onClick="{{ tgRotate }}" style="{{ sAnimRotate }}">{{ rotateLbl }}</button>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:7px">
+        <div style="font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:#8c8c95">Turns / loop</div>
+        <select value="{{ gifTurns }}" onChange="{{ onTurns }}"><option value="auto">Auto · 1 symmetry step</option><option value="0.25">¼ turn</option><option value="0.5">½ turn</option><option value="1">1 full turn</option><option value="2">2 turns</option></select>
+      </div>
+      <div style="display:flex;justify-content:space-between;align-items:center">
+        <span style="font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:#cfcfd6">Thread flow</span>
+        <button onClick="{{ tgFlow }}" style="{{ sAnimFlow }}">{{ flowLbl }}</button>
+      </div>
+      <div style="display:flex;justify-content:space-between;align-items:center">
+        <span style="font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:#cfcfd6">Thread move <span style="color:#5a5a62;text-transform:none;letter-spacing:0">· drift/grow/scale</span></span>
+        <button onClick="{{ tgThreadMove }}" style="{{ sThreadMove }}">{{ threadMoveLbl }}</button>
+      </div>
+      <div style="display:flex;justify-content:space-between;align-items:center;border-top:1px solid #1c1c20;padding-top:13px">
+        <span style="font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:#cfcfd6">Grain sweep</span>
+        <button onClick="{{ tgGrainAnim }}" style="{{ sGrainAnim }}">{{ grainAnimLbl }}</button>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:8px">
+        <div style="display:flex;justify-content:space-between;font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:#8c8c95"><span>Grain target</span><span style="color:#f4f4f0">{{ grainTarget }}</span></div>
+        <input type="range" min="20" max="84" step="1" value="{{ grainTarget }}" onInput="{{ onGrainTarget }}">
+      </div>
+      <p style="font-size:10px;line-height:1.6;color:#5a5a62;letter-spacing:.04em">Grain eases from your Field <b style="color:#9a9aa2">Grain</b> (the initial) out to this target and back, once per loop — a zoom / detail breathing effect that stays seamless.</p>
+      <div style="height:1px;background:#1c1c20;margin:2px 0"></div>
+      <button onClick="{{ recordLoop }}" style="width:100%;padding:11px;background:transparent;color:#eaeaea;border:1px solid #2a2a30;font-family:inherit;font-size:11px;letter-spacing:.08em;text-transform:uppercase;cursor:pointer">{{ recLbl }}</button>
+      <button onClick="{{ exportGif }}" style="width:100%;padding:11px;background:transparent;color:#eaeaea;border:1px solid #2a2a30;font-family:inherit;font-size:11px;letter-spacing:.08em;text-transform:uppercase;cursor:pointer">{{ gifLbl }}</button>
+      <p style="font-size:10px;line-height:1.6;color:#5a5a62;letter-spacing:.04em;margin-top:2px"><b style="color:#9a9aa2">WebM</b> records ~6s of the live canvas (works offline). <b style="color:#9a9aa2">GIF</b> renders a true <b style="color:#9a9aa2">seamless loop</b> (30 frames, ~460px) — for n-fold mandalas it rotates exactly one symmetry step so the loop is invisible. Tip: lower Grain for smaller files.</p>
+    </section>
+
+    <!-- FRAME -->
+    <section style="{{ panFrame }}">
+      <div style="display:flex;flex-direction:column;gap:7px">
+        <div style="font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:#8c8c95">Border style</div>
+        <select value="{{ frameStyle }}" onChange="{{ onFrameStyle }}"><option value="none">None</option><option value="line">Single line</option><option value="double">Double line</option><option value="dashed">Dashed</option><option value="beads">Beads</option><option value="key">Key / ticks</option></select>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:8px">
+        <div style="display:flex;justify-content:space-between;font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:#8c8c95"><span>Nested count</span><span style="color:#f4f4f0">{{ frameCount }}</span></div>
+        <input type="range" min="1" max="5" step="1" value="{{ frameCount }}" onInput="{{ onFrameCount }}">
+      </div>
+      <div style="display:flex;flex-direction:column;gap:8px">
+        <div style="display:flex;justify-content:space-between;font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:#8c8c95"><span>Thickness</span><span style="color:#f4f4f0">{{ frameThick }}</span></div>
+        <input type="range" min="2" max="100" step="1" value="{{ frameThick }}" onInput="{{ onFrameThick }}">
+      </div>
+      <div style="display:flex;flex-direction:column;gap:7px">
+        <div style="font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:#8c8c95">Color</div>
+        <select value="{{ frameColor }}" onChange="{{ onFrameColor }}"><option value="light">White / light</option><option value="#e8112d">Red</option><option value="#1f5fc4">Blue</option><option value="#f6c200">Yellow</option><option value="#138a3e">Green</option></select>
+      </div>
+    </section>
+
+    <!-- COLOR -->
+    <section style="{{ panColor }}">
+      <div style="font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:#8c8c95">Presets</div>
+      <div style="display:flex;flex-wrap:wrap;gap:5px">
+        <button onClick="{{ pPrimary }}" style="padding:7px 9px;background:transparent;border:1px solid #26262c;color:#cfcfd6;font-family:inherit;font-size:10px;letter-spacing:.06em;cursor:pointer;border-radius:2px">Primary</button>
+        <button onClick="{{ pEmber }}" style="padding:7px 9px;background:transparent;border:1px solid #26262c;color:#cfcfd6;font-family:inherit;font-size:10px;letter-spacing:.06em;cursor:pointer;border-radius:2px">Ember</button>
+        <button onClick="{{ pFrost }}" style="padding:7px 9px;background:transparent;border:1px solid #26262c;color:#cfcfd6;font-family:inherit;font-size:10px;letter-spacing:.06em;cursor:pointer;border-radius:2px">Frost</button>
+        <button onClick="{{ pPop }}" style="padding:7px 9px;background:transparent;border:1px solid #26262c;color:#cfcfd6;font-family:inherit;font-size:10px;letter-spacing:.06em;cursor:pointer;border-radius:2px">Pop</button>
+        <button onClick="{{ pEarth }}" style="padding:7px 9px;background:transparent;border:1px solid #26262c;color:#cfcfd6;font-family:inherit;font-size:10px;letter-spacing:.06em;cursor:pointer;border-radius:2px">Earth</button>
+        <button onClick="{{ pMono }}" style="padding:7px 9px;background:transparent;border:1px solid #26262c;color:#cfcfd6;font-family:inherit;font-size:10px;letter-spacing:.06em;cursor:pointer;border-radius:2px">Mono</button>
+      </div>
+      <button onClick="{{ harmonize }}" style="width:100%;padding:9px;background:#141417;border:1px solid #2a2a30;color:#eaeaea;font-family:inherit;font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;cursor:pointer;border-radius:2px">✦ Harmonize random palette</button>
+      <div style="font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:#8c8c95;margin-top:4px">Swatches</div>
+      <div style="display:flex;flex-direction:column;gap:6px">
+        <sc-for list="{{ palColors }}" as="c" hint-placeholder-count="5">
+          <div style="display:flex;align-items:center;gap:8px">
+            <input type="color" value="{{ c }}" data-i="{{ $index }}" onInput="{{ onPalColor }}" style="width:34px;height:26px">
+            <span style="flex:1;font-size:11px;color:#9a9aa2;letter-spacing:.05em">{{ c }}</span>
+            <button data-i="{{ $index }}" onClick="{{ onPalRemove }}" style="width:24px;height:24px;background:transparent;border:1px solid #26262c;color:#8c8c95;cursor:pointer;border-radius:2px;font-family:inherit">×</button>
+          </div>
+        </sc-for>
+      </div>
+      <button onClick="{{ onPalAdd }}" style="width:100%;padding:8px;background:transparent;border:1px dashed #2a2a30;color:#9a9aa2;font-family:inherit;font-size:10.5px;letter-spacing:.08em;cursor:pointer;border-radius:2px">+ Add color</button>
+      <div style="display:flex;align-items:center;justify-content:space-between;border-top:1px solid #1c1c20;padding-top:12px">
+        <span style="font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:#8c8c95">Background</span>
+        <input type="color" value="{{ palBg }}" onInput="{{ onBgColor }}" style="width:40px;height:26px">
+      </div>
+    </section>
+
+    <!-- EXPORT -->
+    <section style="{{ panExport }}">
+      <button onClick="{{ dlPng }}" style="width:100%;padding:11px;background:#e8112d;color:#fff;border:none;font-family:inherit;font-size:11px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;cursor:pointer">↓ PNG (raster)</button>
+      <button onClick="{{ dlSvg }}" style="width:100%;padding:11px;background:transparent;color:#eaeaea;border:1px solid #2a2a30;font-family:inherit;font-size:11px;letter-spacing:.1em;text-transform:uppercase;cursor:pointer">↓ SVG (vector)</button>
+      <div style="height:1px;background:#1c1c20;margin:4px 0"></div>
+      <button onClick="{{ copyLink }}" style="width:100%;padding:10px;background:transparent;color:#cfcfd6;border:1px solid #26262c;font-family:inherit;font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;cursor:pointer">⎘ {{ copyLbl }}</button>
+      <button onClick="{{ saveJson }}" style="width:100%;padding:10px;background:transparent;color:#cfcfd6;border:1px solid #26262c;font-family:inherit;font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;cursor:pointer">↓ Save config (.json)</button>
+      <button onClick="{{ loadJsonClick }}" style="width:100%;padding:10px;background:transparent;color:#cfcfd6;border:1px solid #26262c;font-family:inherit;font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;cursor:pointer">↑ Load config (.json)</button>
+      <input type="file" accept="application/json" ref="{{ fileRef }}" onChange="{{ onLoadJson }}" style="display:none">
+      <p style="font-size:10px;line-height:1.6;color:#5a5a62;letter-spacing:.04em;margin-top:4px">SVG keeps glyphs as crisp vector rects &amp; threads as paths — scalable and editable. Copy Link encodes the full recipe in the URL.</p>
+    </section>
+
+  </aside>
+
+  <main style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;padding:28px;min-width:0;position:relative">
+    <div style="padding:12px;background:#000;border:1px solid #1c1c20;box-shadow:0 24px 80px rgba(0,0,0,.6);max-width:100%;max-height:88vh;display:flex">
+      <canvas id="tap2-canvas" ref="{{ canvasRef }}" style="display:block;max-width:100%;max-height:84vh;image-rendering:pixelated;background:#000"></canvas>
+    </div>
+    <div style="font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:#6f6f78">{{ modeLabel }} · {{ symLabel }} · {{ shapeLabel }} · {{ dimLabel }} · seed {{ seedHex }}</div>
+
+    <div style="{{ varOverlay }}">
+      <div style="background:#0a0a0c;border:1px solid #26262c;padding:22px;display:flex;flex-direction:column;gap:14px;max-width:680px;width:90%">
+        <div style="display:flex;justify-content:space-between;align-items:center">
+          <span style="font-family:'Space Grotesk',sans-serif;font-size:15px;color:#f4f4f0">Pick a variation</span>
+          <button onClick="{{ closeVar }}" style="background:transparent;border:1px solid #26262c;color:#cfcfd6;width:28px;height:28px;cursor:pointer;border-radius:2px;font-family:inherit">×</button>
+        </div>
+        <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px">
+          <canvas ref="{{ v0 }}" data-v="0" onClick="{{ pickVar }}" style="width:100%;aspect-ratio:1;background:#000;cursor:pointer;image-rendering:pixelated;border:1px solid #1c1c20"></canvas>
+          <canvas ref="{{ v1 }}" data-v="1" onClick="{{ pickVar }}" style="width:100%;aspect-ratio:1;background:#000;cursor:pointer;image-rendering:pixelated;border:1px solid #1c1c20"></canvas>
+          <canvas ref="{{ v2 }}" data-v="2" onClick="{{ pickVar }}" style="width:100%;aspect-ratio:1;background:#000;cursor:pointer;image-rendering:pixelated;border:1px solid #1c1c20"></canvas>
+          <canvas ref="{{ v3 }}" data-v="3" onClick="{{ pickVar }}" style="width:100%;aspect-ratio:1;background:#000;cursor:pointer;image-rendering:pixelated;border:1px solid #1c1c20"></canvas>
+          <canvas ref="{{ v4 }}" data-v="4" onClick="{{ pickVar }}" style="width:100%;aspect-ratio:1;background:#000;cursor:pointer;image-rendering:pixelated;border:1px solid #1c1c20"></canvas>
+          <canvas ref="{{ v5 }}" data-v="5" onClick="{{ pickVar }}" style="width:100%;aspect-ratio:1;background:#000;cursor:pointer;image-rendering:pixelated;border:1px solid #1c1c20"></canvas>
+          <canvas ref="{{ v6 }}" data-v="6" onClick="{{ pickVar }}" style="width:100%;aspect-ratio:1;background:#000;cursor:pointer;image-rendering:pixelated;border:1px solid #1c1c20"></canvas>
+          <canvas ref="{{ v7 }}" data-v="7" onClick="{{ pickVar }}" style="width:100%;aspect-ratio:1;background:#000;cursor:pointer;image-rendering:pixelated;border:1px solid #1c1c20"></canvas>
+          <canvas ref="{{ v8 }}" data-v="8" onClick="{{ pickVar }}" style="width:100%;aspect-ratio:1;background:#000;cursor:pointer;image-rendering:pixelated;border:1px solid #1c1c20"></canvas>
+        </div>
+        <p style="font-size:10px;color:#5a5a62;letter-spacing:.06em">Click any tile to adopt its seed · or Regenerate for a fresh batch</p>
+      </div>
+    </div>
+  </main>
+
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:1320,&quot;height&quot;:880}}">
+class Component extends DCLogic {
+  canvasRef = React.createRef();
+  fileRef = React.createRef();
+  varRefs = [0,1,2,3,4,5,6,7,8].map(()=>React.createRef());
+
+  PRESETS = {
+    primary:{ colors:['#1f5fc4','#e8112d','#f6c200','#138a3e','#f4f4f0'], bg:'#000000', weightFirst:2 },
+    ember:{ colors:['#d8431a','#e2711d','#f3c623','#2f97d6','#163e6e','#ece3cf'], bg:'#000000', weightFirst:1 },
+    frost:{ colors:['#2b6fd1','#7fa8de','#138a3e','#f4f4f0','#e7b53b'], bg:'#000000', weightFirst:2 },
+    pop:{ colors:['#ff3b30','#ff9500','#ffcc00','#34c759','#5ac8fa','#af52de'], bg:'#0a0a0c', weightFirst:1 },
+    earth:{ colors:['#8a5a2b','#c98a3a','#d9c27a','#5a6e3a','#3a4a3a','#e8ddc0'], bg:'#1a1410', weightFirst:1 },
+    mono:{ colors:['#f4f4f0','#9a9aa2','#1f5fc4','#e8112d'], bg:'#000000', weightFirst:1 },
+  };
+
+  GLYPHS = {
+    frame:['1111111','1000001','1000001','1000001','1000001','1000001','1111111'],
+    frameDot:['1111111','1000001','1000001','1001001','1000001','1000001','1111111'],
+    nested:['1111111','1000001','1011101','1010101','1011101','1000001','1111111'],
+    maze:['1111111','1000000','1011110','1010010','1011110','1000000','1111111'],
+    ring:['0011100','0100010','1000001','1000001','1000001','0100010','0011100'],
+    ringDot:['0011100','0100010','1000001','1001001','1000001','0100010','0011100'],
+    dot:['0000000','0000000','0000000','0001000','0000000','0000000','0000000'],
+    bigdot:['0000000','0000000','0011100','0011100','0011100','0000000','0000000'],
+    plus:['0001000','0001000','0001000','1111111','0001000','0001000','0001000'],
+    x:['1000001','0100010','0010100','0001000','0010100','0100010','1000001'],
+    checker:['1010101','0101010','1010101','0101010','1010101','0101010','1010101'],
+    stripesH:['1111111','0000000','1111111','0000000','1111111','0000000','1111111'],
+    stripesV:['1010101','1010101','1010101','1010101','1010101','1010101','1010101'],
+    bricks:['1110111','1110111','0000000','0111011','0111011','0000000','1110111'],
+    blockS:['0000000','0111110','0111110','0111110','0111110','0111110','0000000'],
+    halfA:['1000000','1100000','1110000','1111000','1111100','1111110','1111111'],
+    halfB:['1111111','0111111','0011111','0001111','0000111','0000011','0000001'],
+    aster:['1001001','0101010','0011100','1111111','0011100','0101010','1001001'],
+    tri:['0001000','0001000','0011100','0011100','0111110','0111110','1111111'],
+    diamond:['0001000','0011100','0111110','1111111','0111110','0011100','0001000'],
+    oct:['0011100','0111110','1111111','1111111','1111111','0111110','0011100'],
+    chevron:['1000001','1100011','0110110','0011100','0001000','0000000','0000000'],
+    arrow:['0001000','0011100','0111110','1111111','0011100','0011100','0011100'],
+  };
+  SETS = {
+    basic:['dot','bigdot','plus','x','ring','ringDot'],
+    frames:['frame','frameDot','nested','maze'],
+    texture:['checker','stripesH','stripesV','bricks','blockS'],
+    geo:['halfA','halfB','aster','tri','diamond','oct','chevron','arrow'],
+  };
+
+  state = this.initState();
+
+  initState(){
+    const fromHash = this.readHash();
+    const base = {
+      mode:'mandala', sym:'8', aspect:'square', shapeMask:'rect',
+      grain:48, voidness:40, contrast:55,
+      glyphOn:true, glyphAmount:60, glyphAccent:14, glyphStack:1,
+      setBasic:true, setFrames:true, setTexture:true, setGeo:true,
+      slashOn:true, slashAmount:32,
+      pipesOn:false, pipesStyle:'arc', pipesAmount:45, pipesWeight:24, pipesColor:'light',
+      threadsOn:true, threadsType:'curve', threadsAmount:40, threadsWeight:18,
+      frameStyle:'none', frameCount:1, frameThick:24, frameColor:'light',
+      palColors:['#1f5fc4','#e8112d','#f6c200','#138a3e','#f4f4f0'], palBg:'#000000', palLight:'#f4f4f0',
+      seed:(Math.random()*1e9)|0,
+      animOn:false, animSpeed:50, animChurn:true, animRotate:true, animFlow:true, animThreadMove:false, recording:false, gifBusy:false, gifProg:0,
+      gifTurns:'auto', grainAnim:false, grainTarget:28,
+      tab:'field', showVar:false, copyLbl:'Copy link',
+    };
+    return Object.assign(base, fromHash||{});
+  }
+
+  // ---------- math ----------
+  clamp(v,a,b){ return v<a?a:v>b?b:v; }
+  clamp01(v){ return v<0?0:v>1?1:v; }
+  frac(v){ return v-Math.floor(v); }
+  hash(x,y,s){ let h=(x|0)*374761393+(y|0)*668265263+(s|0)*1013904223; h=(h^(h>>>13))>>>0; h=(h*1274126177)>>>0; h^=h>>>16; return (h>>>0)/4294967295; }
+  vnoise(x,y,s){
+    const xi=Math.floor(x), yi=Math.floor(y), xf=x-xi, yf=y-yi;
+    const u=xf*xf*(3-2*xf), v=yf*yf*(3-2*yf);
+    const a=this.hash(xi,yi,s), b=this.hash(xi+1,yi,s), c=this.hash(xi,yi+1,s), d=this.hash(xi+1,yi+1,s);
+    return a+(b-a)*u+(c-a)*v+(a-b-c+d)*u*v;
+  }
+  fbm(x,y,s,oct){ oct=oct||3; let sum=0,amp=0.5,f=1,norm=0; for(let i=0;i<oct;i++){ sum+=amp*this.vnoise(x*f,y*f,s+i*131); norm+=amp; amp*=0.5; f*=2; } return sum/norm; }
+  hslToHex(h,s,l){
+    s/=100; l/=100; const k=n=>(n+h/30)%12; const a=s*Math.min(l,1-l);
+    const f=n=>{ const c=l-a*Math.max(-1,Math.min(k(n)-3,Math.min(9-k(n),1))); return Math.round(255*c).toString(16).padStart(2,'0'); };
+    return '#'+f(0)+f(8)+f(4);
+  }
+
+  // ---------- geometry ----------
+  geom(cfg){
+    const cols=cfg.grain;
+    let ratio=1; if(cfg.aspect==='portrait') ratio=1.38; else if(cfg.aspect==='landscape') ratio=0.72; else if(cfg.aspect==='banner') ratio=0.5;
+    const rows=Math.max(8,Math.round(cols*ratio));
+    const M=7, longest=Math.max(cols,rows);
+    const mu=this.clamp(Math.round(1180/(longest*M)),1,8);
+    const cell=M*mu, W=cols*cell, H=rows*cell;
+    return {cols,rows,M,mu,cell,W,H};
+  }
+
+  fold(cx,cy,cxC,cyC,sym,rot){
+    rot=rot||0;
+    let dx=cx+0.5-cxC, dy=cy+0.5-cyC; const r=Math.hypot(dx,dy);
+    if(sym==='none') return {x:cx,y:cy,r,a:Math.atan2(dy,dx)+rot};
+    if(sym==='mirror') return {x:cxC+Math.abs(dx),y:cy,r,a:Math.atan2(dy,dx)+rot};
+    const n=parseInt(sym,10); const seg=Math.PI/n;
+    let a=Math.atan2(dy,dx)+rot; a=((a%(2*seg))+2*seg)%(2*seg); if(a>seg) a=2*seg-a;
+    return {x:cxC+Math.cos(a)*r, y:cyC+Math.sin(a)*r, r, a};
+  }
+
+  glyphPool(cfg){
+    let pool=[];
+    if(cfg.setBasic) pool=pool.concat(this.SETS.basic);
+    if(cfg.setFrames) pool=pool.concat(this.SETS.frames);
+    if(cfg.setTexture) pool=pool.concat(this.SETS.texture);
+    if(cfg.setGeo) pool=pool.concat(this.SETS.geo);
+    if(!pool.length) pool=this.SETS.basic.slice();
+    return pool;
+  }
+
+  // ---------- sinks ----------
+  canvasSink(ctx){
+    return {
+      rect:(x,y,w,h,f)=>{ ctx.fillStyle=f; ctx.fillRect(x,y,w,h); },
+      poly:(pts,s,w,a,dash,dashOff)=>{ if(pts.length<2)return; ctx.strokeStyle=s; ctx.lineWidth=w; ctx.globalAlpha=a==null?1:a; ctx.lineCap='round'; ctx.lineJoin='round'; ctx.lineDashOffset=dashOff||0; ctx.setLineDash(dash?[w*2.5,w*2.5]:[]); ctx.beginPath(); ctx.moveTo(pts[0][0],pts[0][1]); for(let i=1;i<pts.length;i++) ctx.lineTo(pts[i][0],pts[i][1]); ctx.stroke(); ctx.globalAlpha=1; ctx.setLineDash([]); ctx.lineDashOffset=0; },
+      arc:(cx,cy,r,a0,a1,s,w)=>{ ctx.strokeStyle=s; ctx.lineWidth=w; ctx.lineCap='round'; ctx.beginPath(); ctx.arc(cx,cy,r,a0,a1); ctx.stroke(); },
+      clip:(shape)=>{ ctx.save(); this.maskPath(ctx,shape); ctx.clip(); },
+      unclip:()=>{ ctx.restore(); },
+    };
+  }
+  svgSink(parts){
+    const f2=v=>Math.round(v*100)/100;
+    return {
+      _clip:null,
+      rect:(x,y,w,h,fl)=>{ parts.push(`<rect x="${f2(x)}" y="${f2(y)}" width="${f2(w)}" height="${f2(h)}" fill="${fl}"/>`); },
+      poly:(pts,s,w,a,dash)=>{ if(pts.length<2)return; const p=pts.map(q=>f2(q[0])+','+f2(q[1])).join(' '); parts.push(`<polyline points="${p}" fill="none" stroke="${s}" stroke-width="${f2(w)}" stroke-linecap="round" stroke-linejoin="round"${a!=null?` opacity="${a}"`:''}${dash?` stroke-dasharray="${f2(w*2.5)} ${f2(w*2.5)}"`:''}/>`); },
+      arc:(cx,cy,r,a0,a1,s,w)=>{ const x0=cx+r*Math.cos(a0),y0=cy+r*Math.sin(a0),x1=cx+r*Math.cos(a1),y1=cy+r*Math.sin(a1); parts.push(`<path d="M ${f2(x0)} ${f2(y0)} A ${f2(r)} ${f2(r)} 0 0 1 ${f2(x1)} ${f2(y1)}" fill="none" stroke="${s}" stroke-width="${f2(w)}" stroke-linecap="round"/>`); },
+      clip:(shape)=>{ this._clip=shape; parts.push('<g clip-path="url(#mask)">'); },
+      unclip:()=>{ parts.push('</g>'); },
+    };
+  }
+
+  maskShapeDesc(cfg,W,H){ return {type:cfg.shapeMask,W,H}; }
+  maskPath(ctx,sh){
+    const W=sh.W,H=sh.H; ctx.beginPath();
+    if(sh.type==='rect'){ ctx.rect(0,0,W,H); }
+    else if(sh.type==='circle'){ ctx.ellipse(W/2,H/2,W/2,H/2,0,0,Math.PI*2); }
+    else if(sh.type==='diamond'){ ctx.moveTo(W/2,0); ctx.lineTo(W,H/2); ctx.lineTo(W/2,H); ctx.lineTo(0,H/2); ctx.closePath(); }
+    else if(sh.type==='hex'){ const cx=W/2,cy=H/2,rx=W/2,ry=H/2; for(let i=0;i<6;i++){ const an=Math.PI/180*(60*i-90); const x=cx+rx*Math.cos(an), y=cy+ry*Math.sin(an); i?ctx.lineTo(x,y):ctx.moveTo(x,y);} ctx.closePath(); }
+    else if(sh.type==='arch'){ const r=W/2; ctx.moveTo(0,H); ctx.lineTo(0,r); ctx.arc(W/2,r,r,Math.PI,0); ctx.lineTo(W,H); ctx.closePath(); }
+    else ctx.rect(0,0,W,H);
+  }
+  svgClipPath(sh){
+    const W=sh.W,H=sh.H;
+    if(sh.type==='circle') return `<ellipse cx="${W/2}" cy="${H/2}" rx="${W/2}" ry="${H/2}"/>`;
+    if(sh.type==='diamond') return `<polygon points="${W/2},0 ${W},${H/2} ${W/2},${H} 0,${H/2}"/>`;
+    if(sh.type==='hex'){ let p=[]; for(let i=0;i<6;i++){ const an=Math.PI/180*(60*i-90); p.push((W/2+W/2*Math.cos(an))+','+(H/2+H/2*Math.sin(an))); } return `<polygon points="${p.join(' ')}"/>`; }
+    if(sh.type==='arch'){ const r=W/2; return `<path d="M 0 ${H} L 0 ${r} A ${r} ${r} 0 0 1 ${W} ${r} L ${W} ${H} Z"/>`; }
+    return `<rect x="0" y="0" width="${W}" height="${H}"/>`;
+  }
+
+  // ---------- core generation (sink-driven) ----------
+  generate(g, cfg){
+    const G=this.geom(cfg); const {cols,rows,M,mu,cell,W,H}=G;
+    const colors=cfg.palColors.length?cfg.palColors:['#f4f4f0']; const nC=colors.length;
+    const light=cfg.palLight||'#f4f4f0'; const bg=cfg.palBg||'#000000';
+    const seed=cfg.seed;
+    const sC=seed+11, sG=seed+71, sP=seed+131, sF=seed+211, sW=seed+401;
+    const WARP=2.4, WF=0.22, FC=0.085, FP=0.17, FF=0.11, FG=0.075;
+    const cxC=cols/2, cyC=rows/2;
+    const voidThresh=0.30+cfg.voidness/100*0.46;
+    const solidThresh=0.64-cfg.glyphAmount/100*0.52;
+    const cContrast=0.9+cfg.contrast/100*1.6;
+    const pool=this.glyphPool(cfg); const nG=pool.length;
+    const mand=(cfg.mode==='mandala');
+    const shape=this.maskShapeDesc(cfg,W,H);
+    const T=cfg._t||0; const churn=!!cfg._churn;
+    const ph=(cfg._phase!=null)?cfg._phase:(T*0.6);
+    const cphx=churn?1.2*Math.sin(ph):0, cphy=churn?1.2*Math.cos(ph):0;
+    const cslidC=churn?0.4*Math.sin(ph):0; const cstrat=churn?2.0*Math.sin(ph):0;
+
+    g.rect(0,0,W,H,bg);
+    g.clip(shape);
+
+    // FIELD + GLYPHS + SLASH + PIPES (per cell)
+    for(let cy=0;cy<rows;cy++){
+      for(let cx=0;cx<cols;cx++){
+        let f=this.fold(cx,cy,cxC,cyC,cfg.sym,cfg._rot||0);
+        let ax=f.x, ay=f.y, r=f.r, ang=f.a;
+        let wx,wy;
+        if(cfg.mode==='strata'){ const rj=this.hash(0,cy,seed)*6; wx=ax*0.05+rj+cstrat; wy=ay*0.9; }
+        else { wx=ax+WARP*(this.fbm(ax*WF+cphx,ay*WF+cphy,sW)-0.5); wy=ay+WARP*(this.fbm(ax*WF+5.2-cphy,ay*WF+9.1+cphx,sW+3)-0.5); }
+        // color
+        let cval=this.fbm(wx*FC+cslidC,wy*FC,sC,4);
+        if(cfg.mode==='rings') cval=0.45*cval+0.55*this.frac(r*0.14);
+        else if(cfg.mode==='spiral') cval=0.45*cval+0.55*this.frac(ang/(Math.PI*2)+r*0.09);
+        else if(cfg.sym!=='none') cval=0.62*cval+0.38*this.vnoise(r*0.5,0,sC);
+        cval=this.clamp01((cval-0.5)*cContrast+0.5);
+        const colorIdx=Math.min(nC-1,Math.floor(cval*nC));
+        const col=colors[colorIdx];
+        const ox=cx*cell, oy=cy*cell;
+        // presence
+        const rcell=this.hash(cx,cy,seed+999);
+        const pv=this.fbm(wx*FP,wy*FP,sP,3)+(rcell-0.5)*0.45;
+        let isVoid=pv<voidThresh;
+        if(isVoid){
+          if(this.hash(cx,cy,seed+7)>0.88){ g.rect(ox+3*mu,oy+3*mu,mu,mu,col); }
+        } else {
+          const ft=this.fbm(wx*FF,wy*FF,sF,3);
+          if(ft<solidThresh){ g.rect(ox,oy,cell,cell,col); }
+          else if(cfg.glyphOn){
+            const layers=cfg.glyphStack;
+            for(let L=0;L<layers;L++){
+              let gn=this.fbm(wx*FG+L*3.3,wy*FG+L*1.7,sG,3);
+              if(cfg.sym!=='none') gn=0.6*gn+0.4*this.vnoise(r*0.4+L,3,sG);
+              let gi=this.clamp(Math.floor(gn*nG),0,nG-1);
+              if(this.hash(cx,cy,seed+55+L*13)>0.82) gi=Math.floor(this.hash(cx,cy,seed+88+L*7)*nG)%nG;
+              let gcol = (this.hash(cx,cy,seed+33+L*5) < cfg.glyphAccent/100) ? light : (L===0?col:colors[(colorIdx+1+L)%nC]);
+              this.drawGlyph(g,ox,oy,mu,this.GLYPHS[pool[gi]],gcol);
+            }
+          } else {
+            g.rect(ox,oy,cell,cell,col);
+          }
+        }
+        // pipes
+        if(cfg.pipesOn){
+          const pp=this.fbm(wx*0.13+3.1,wy*0.13+7.7,seed+501,3);
+          if(pp > 1-(cfg.pipesAmount/100)*0.85){
+            const pcol = cfg.pipesColor==='light'?light : cfg.pipesColor==='region'?col : cfg.pipesColor;
+            const pw=Math.max(1, cell*(0.04+cfg.pipesWeight/100*0.2));
+            this.drawPipe(g,ox,oy,cell,cfg.pipesStyle,pcol,pw,this.hash(cx,cy,seed+777));
+          }
+        }
+        // slash
+        if(cfg.slashOn && !isVoid && this.hash(cx,cy,seed+404)<cfg.slashAmount/100*0.5){
+          const sc=this.hash(cx,cy,seed+405)>0.5?'#e8112d':light; const sw=Math.max(1,mu*0.7);
+          if(this.hash(cx,cy,seed+406)>0.5) g.poly([[ox,oy],[ox+cell,oy+cell]],sc,sw,1);
+          else g.poly([[ox+cell,oy],[ox,oy+cell]],sc,sw,1);
+        }
+      }
+    }
+    // THREADS
+    if(cfg.threadsOn) this.drawThreads(g,cfg,G,seed+307);
+
+    g.unclip();
+    // FRAME
+    if(cfg.frameStyle!=='none') this.drawFrame(g,cfg,G,light);
+
+    return G;
+  }
+
+  drawGlyph(g,ox,oy,mu,bmp,color){
+    for(let r=0;r<7;r++){ const row=bmp[r]; for(let c=0;c<7;c++){ if(row.charCodeAt(c)===49) g.rect(ox+c*mu,oy+r*mu,mu,mu,color); } }
+  }
+
+  drawPipe(g,ox,oy,cell,style,color,w,h){
+    const m=cell/2;
+    if(style==='arc'){
+      if(h>0.5){ g.arc(ox,oy,m,0,Math.PI/2,color,w); g.arc(ox+cell,oy+cell,m,Math.PI,Math.PI*1.5,color,w); }
+      else { g.arc(ox+cell,oy,m,Math.PI/2,Math.PI,color,w); g.arc(ox,oy+cell,m,Math.PI*1.5,Math.PI*2,color,w); }
+    } else if(style==='maze'){
+      if(h>0.5) g.poly([[ox,oy],[ox+cell,oy+cell]],color,w,1);
+      else g.poly([[ox+cell,oy],[ox,oy+cell]],color,w,1);
+    } else { // circuit
+      const cxp=ox+m, cyp=oy+m;
+      const edges=[[ox+m,oy],[ox+cell,oy+m],[ox+m,oy+cell],[ox,oy+m]];
+      for(let e=0;e<4;e++){ if(this.hash(ox+e,oy,e+1)>0.42) g.poly([[cxp,cyp],edges[e]],color,w,1); }
+      g.rect(cxp-w*0.7,cyp-w*0.7,w*1.4,w*1.4,color);
+    }
+  }
+
+  drawThreads(g,cfg,G,seed){
+    const amt=cfg.threadsAmount; if(amt<=0) return;
+    const {cols,cell,W,H}=G;
+    const n=Math.floor(amt/100*cols*1.3);
+    const tc=cfg.palColors.concat([cfg.palLight||'#f4f4f0']);
+    const w=Math.max(1, cell*0.03 + cfg.threadsWeight/100*cell*0.12);
+    const dash=cfg.threadsType==='dash';
+    const flow=!!cfg._flow; const dashOn=dash||flow;
+    const dOff=flow?(cfg._flowFrac!=null?-cfg._flowFrac*(w*5)*6:-(cfg._t*80)):0;
+    const ortho=cfg.threadsType==='ortho';
+    const cxC=W/2,cyC=H/2;
+    const symN = (cfg.mode==='mandala'||cfg.sym!=='none') ? (cfg.sym==='mirror'?2:cfg.sym==='none'?1:parseInt(cfg.sym,10)) : 1;
+    const TAU=Math.PI*2;
+    const move=!!cfg._tmove;
+    const tph=(cfg._flowFrac!=null)?cfg._flowFrac:((cfg._t||0)*0.10);
+    for(let i=0;i<n;i++){
+      const ph1=this.hash(i,11,seed), ph2=this.hash(i,12,seed), ph3=this.hash(i,13,seed), ph4=this.hash(i,14,seed);
+      const dxA=move?Math.sin(TAU*(tph+ph1))*cell*5:0;
+      const dyA=move?Math.cos(TAU*(tph+ph1))*cell*5:0;
+      let x=this.hash(i,0,seed)*W+dxA, y=this.hash(i,1,seed)*H+dyA;
+      const col=tc[Math.floor(this.hash(i,2,seed)*tc.length)];
+      const grow=move?(0.35+0.65*((1-Math.cos(TAU*(tph+ph2)))/2)):1;
+      const steps=Math.max(4, Math.round((40+Math.floor(this.hash(i,3,seed)*90))*grow));
+      const wmul=move?(0.6+0.8*((1+Math.cos(TAU*(tph+ph4)))/2)):1;
+      const wDyn=Math.max(1, w*wmul);
+      const pts=[];
+      for(let s=0;s<steps;s++){
+        pts.push([x,y]);
+        let ang=this.fbm(x*0.004,y*0.004,seed+5,3)*Math.PI*4;
+        if(ortho){ ang=Math.round(ang/(Math.PI/2))*(Math.PI/2); }
+        x+=Math.cos(ang)*cell*0.55; y+=Math.sin(ang)*cell*0.55;
+        if(x<-cell||x>W+cell||y<-cell||y>H+cell) break;
+      }
+      if(move && pts.length){
+        let mx=0,my=0; for(const p of pts){ mx+=p[0]; my+=p[1]; } mx/=pts.length; my/=pts.length;
+        const sc=0.6+0.4*((1+Math.sin(TAU*(tph+ph3)))/2);
+        for(const p of pts){ p[0]=mx+(p[0]-mx)*sc; p[1]=my+(p[1]-my)*sc; }
+      }
+      if(symN>1){
+        for(let k=0;k<symN;k++){
+          const rot=k*(Math.PI*2/symN);
+          const ca=Math.cos(rot), sa=Math.sin(rot);
+          const rp=pts.map(([px,py])=>{ const dx=px-cxC,dy=py-cyC; return [cxC+dx*ca-dy*sa, cyC+dx*sa+dy*ca]; });
+          g.poly(rp,col,wDyn,0.9,dashOn,dOff);
+          const mp=pts.map(([px,py])=>{ let dx=px-cxC,dy=py-cyC; dx=-dx; return [cxC+dx*ca-dy*sa, cyC+dx*sa+dy*ca]; });
+          g.poly(mp,col,wDyn,0.9,dashOn,dOff);
+        }
+      } else {
+        g.poly(pts,col,wDyn,0.9,dashOn,dOff);
+      }
+    }
+  }
+
+  drawFrame(g,cfg,G,light){
+    const {W,H,cell}=G;
+    const color = cfg.frameColor==='light'?light:cfg.frameColor;
+    const t = Math.max(2, cfg.frameThick/100*cell*1.6);
+    const gap = t*1.4;
+    for(let k=0;k<cfg.frameCount;k++){
+      const off = t*0.5 + k*(t+gap) + cell*0.3;
+      const x0=off, y0=off, x1=W-off, y1=H-off;
+      if(x1<=x0||y1<=y0) break;
+      const rectPts=[[x0,y0],[x1,y0],[x1,y1],[x0,y1],[x0,y0]];
+      if(cfg.frameStyle==='line'){ g.poly(rectPts,color,t,1); }
+      else if(cfg.frameStyle==='double'){ g.poly(rectPts,color,t*0.4,1); const o2=off+t*0.9; const r2=[[o2,o2],[W-o2,o2],[W-o2,H-o2],[o2,H-o2],[o2,o2]]; if(W-o2>o2) g.poly(r2,color,t*0.4,1); }
+      else if(cfg.frameStyle==='dashed'){ g.poly(rectPts,color,t*0.7,1,true); }
+      else if(cfg.frameStyle==='beads'){ this.beadFrame(g,x0,y0,x1,y1,t,color); }
+      else if(cfg.frameStyle==='key'){ this.keyFrame(g,x0,y0,x1,y1,t,color); }
+    }
+  }
+  beadFrame(g,x0,y0,x1,y1,t,color){
+    const step=t*2.2, s=t*0.9;
+    for(let x=x0;x<=x1;x+=step){ g.rect(x-s/2,y0-s/2,s,s,color); g.rect(x-s/2,y1-s/2,s,s,color); }
+    for(let y=y0;y<=y1;y+=step){ g.rect(x0-s/2,y-s/2,s,s,color); g.rect(x1-s/2,y-s/2,s,s,color); }
+  }
+  keyFrame(g,x0,y0,x1,y1,t,color){
+    const step=t*2.4, len=t*1.1;
+    g.poly([[x0,y0],[x1,y0],[x1,y1],[x0,y1],[x0,y0]],color,t*0.35,1);
+    for(let x=x0;x<=x1;x+=step){ g.poly([[x,y0],[x,y0+len]],color,t*0.35,1); g.poly([[x,y1],[x,y1-len]],color,t*0.35,1); }
+    for(let y=y0;y<=y1;y+=step){ g.poly([[x0,y],[x0+len,y]],color,t*0.35,1); g.poly([[x1,y],[x1-len,y]],color,t*0.35,1); }
+  }
+
+  // ---------- paint ----------
+  drawCanvas(cfg){
+    const cv=this.canvasRef.current||document.getElementById('tap2-canvas'); if(!cv) return;
+    const G=this.geom(cfg);
+    if(cv.width!==G.W||cv.height!==G.H){ cv.width=G.W; cv.height=G.H; }
+    const ctx=cv.getContext('2d'); ctx.imageSmoothingEnabled=false;
+    this.generate(this.canvasSink(ctx), cfg);
+    return G;
+  }
+  paint(){
+    this.drawCanvas(this.cfg());
+    if(this.state.showVar) this.paintVariations();
+  }
+  turnsValue(){
+    const t=this.state.gifTurns;
+    if(t==='auto'){ const b=this.state; if(b.mode==='mandala'){ const n=(b.sym==='mirror'||b.sym==='none')?1:parseInt(b.sym,10); return 1/(n||1); } if(b.mode==='spiral') return 1; return 0; }
+    return parseFloat(t)||0;
+  }
+  animCfg(){
+    const s=this.state; const t=this._t||0;
+    const base=this.cfg();
+    let grain=base.grain;
+    if(s.grainAnim){ const k=(1-Math.cos(t*0.5))/2; grain=Math.max(12,Math.round(base.grain+(s.grainTarget-base.grain)*k)); }
+    const turns=this.turnsValue();
+    return Object.assign(base, {
+      grain,
+      _t:t, _churn:s.animChurn, _flow:s.animFlow, _tmove:s.animThreadMove,
+      _rot: s.animRotate ? t*0.35*(turns||1) : 0,
+    });
+  }
+  startAnim(){
+    this._animing=true;
+    if(this._raf) cancelAnimationFrame(this._raf);
+    this._t0=null;
+    const tick=(ts)=>{
+      if(!this._animing){ this._raf=null; return; }
+      if(this._t0==null) this._t0=ts;
+      const sp=0.15+this.state.animSpeed/100*1.85;
+      this._t=(ts-this._t0)/1000*sp;
+      try{ this.drawCanvas(this.animCfg()); }catch(e){ console.error(e); }
+      this._raf=requestAnimationFrame(tick);
+    };
+    this._raf=requestAnimationFrame(tick);
+  }
+  stopAnim(){ this._animing=false; if(this._raf){ cancelAnimationFrame(this._raf); this._raf=null; } }
+  toggleAnim(){
+    const next=!this._animing;
+    this.setState({animOn:next});
+    if(next) this.startAnim(); else { this.stopAnim(); this.paint(); }
+  }
+  recordLoop(){
+    const cv=this.canvasRef.current; if(!cv) return;
+    if(!cv.captureStream || !window.MediaRecorder){ this.setState({recording:false}); return; }
+    if(!this._animing){ this.setState({animOn:true}); this.startAnim(); }
+    let mime='video/webm';
+    try{ if(MediaRecorder.isTypeSupported('video/webm;codecs=vp9')) mime='video/webm;codecs=vp9'; }catch(e){}
+    const stream=cv.captureStream(30);
+    const rec=new MediaRecorder(stream,{mimeType:mime, videoBitsPerSecond:16000000});
+    const chunks=[];
+    rec.ondataavailable=e=>{ if(e.data&&e.data.size) chunks.push(e.data); };
+    rec.onstop=()=>{ const blob=new Blob(chunks,{type:mime}); const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download='tapestry-loop-'+(this.state.seed>>>0).toString(16)+'.webm'; a.click(); setTimeout(()=>URL.revokeObjectURL(a.href),1500); this.setState({recording:false}); };
+    this.setState({recording:true});
+    rec.start();
+    setTimeout(()=>{ try{ rec.stop(); }catch(e){} }, 6200);
+  }
+  async exportGif(){
+    if(this.state.gifBusy) return;
+    let lib=this._gifenc;
+    if(!lib){
+      try{ lib=await import('https://esm.run/gifenc'); this._gifenc=lib; }
+      catch(e){ console.error(e); this.setState({gifBusy:false}); alert('Could not load the GIF encoder (network blocked). WebM export still works offline.'); return; }
+    }
+    const GIFEncoder=lib.GIFEncoder, quantize=lib.quantize, applyPalette=lib.applyPalette;
+    if(!GIFEncoder){ alert('GIF encoder unavailable.'); return; }
+    const base=this.cfg();
+    const frames=30, loopMs=2600, delay=Math.round(loopMs/frames);
+    const turns=this.turnsValue();
+    const rotSpan=this.state.animRotate ? turns*2*Math.PI : 0;
+    const enc=GIFEncoder();
+    const G0=this.geom(base);
+    const SW=Math.min(G0.W,460), SH=Math.round(G0.H*SW/G0.W);
+    const oc=document.createElement('canvas');
+    const sc=document.createElement('canvas'); sc.width=SW; sc.height=SH;
+    const sctx=sc.getContext('2d'); sctx.imageSmoothingEnabled=false;
+    this.setState({gifBusy:true, gifProg:0});
+    try{
+      for(let i=0;i<frames;i++){
+        const frac=i/frames;
+        let gr=base.grain;
+        if(this.state.grainAnim){ const k=(1-Math.cos(2*Math.PI*frac))/2; gr=Math.max(12,Math.round(base.grain+(this.state.grainTarget-base.grain)*k)); }
+        const cfg=Object.assign({}, base, {
+          grain:gr,
+          _phase: 2*Math.PI*frac,
+          _churn: this.state.animChurn, _flow: this.state.animFlow, _flowFrac: frac, _tmove: this.state.animThreadMove,
+          _rot: rotSpan*frac,
+        });
+        const G=this.geom(cfg);
+        oc.width=G.W; oc.height=G.H;
+        const octx=oc.getContext('2d'); octx.imageSmoothingEnabled=false;
+        this.generate(this.canvasSink(octx), cfg);
+        sctx.clearRect(0,0,SW,SH); sctx.drawImage(oc,0,0,SW,SH);
+        const img=sctx.getImageData(0,0,SW,SH);
+        const palette=quantize(img.data,256);
+        const index=applyPalette(img.data,palette);
+        enc.writeFrame(index,SW,SH,{palette, delay, repeat:0});
+        this.setState({gifProg:(i+1)/frames});
+        await new Promise(r=>setTimeout(r,0));
+      }
+      enc.finish();
+      const blob=new Blob([enc.bytes()],{type:'image/gif'});
+      const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download='tapestry-loop-'+(base.seed>>>0).toString(16)+'.gif'; a.click();
+      setTimeout(()=>URL.revokeObjectURL(a.href),1500);
+    }catch(e){ console.error(e); }
+    this.setState({gifBusy:false, gifProg:0});
+  }
+  paintVariations(){
+    const cfg=this.cfg();
+    for(let i=0;i<9;i++){
+      const cv=this.varRefs[i].current; if(!cv) continue;
+      const vcfg=Object.assign({}, cfg, {seed:(cfg.seed+ i*49157 + 1)|0, grain:Math.min(cfg.grain,40)});
+      const G=this.geom(vcfg); cv.width=G.W; cv.height=G.H;
+      const ctx=cv.getContext('2d'); ctx.imageSmoothingEnabled=false;
+      this.generate(this.canvasSink(ctx), vcfg);
+      cv.dataset.seed=String(vcfg.seed);
+    }
+  }
+
+  cfg(){ const s=this.state; return {
+    mode:s.mode, sym:s.sym, aspect:s.aspect, shapeMask:s.shapeMask,
+    grain:s.grain, voidness:s.voidness, contrast:s.contrast,
+    glyphOn:s.glyphOn, glyphAmount:s.glyphAmount, glyphAccent:s.glyphAccent, glyphStack:s.glyphStack,
+    setBasic:s.setBasic, setFrames:s.setFrames, setTexture:s.setTexture, setGeo:s.setGeo,
+    slashOn:s.slashOn, slashAmount:s.slashAmount,
+    pipesOn:s.pipesOn, pipesStyle:s.pipesStyle, pipesAmount:s.pipesAmount, pipesWeight:s.pipesWeight, pipesColor:s.pipesColor,
+    threadsOn:s.threadsOn, threadsType:s.threadsType, threadsAmount:s.threadsAmount, threadsWeight:s.threadsWeight,
+    frameStyle:s.frameStyle, frameCount:s.frameCount, frameThick:s.frameThick, frameColor:s.frameColor,
+    palColors:s.palColors.slice(), palBg:s.palBg, palLight:s.palLight, seed:s.seed,
+  }; }
+
+  // ---------- config / url ----------
+  CONFIG_KEYS=['mode','sym','aspect','shapeMask','grain','voidness','contrast','glyphOn','glyphAmount','glyphAccent','glyphStack','setBasic','setFrames','setTexture','setGeo','slashOn','slashAmount','pipesOn','pipesStyle','pipesAmount','pipesWeight','pipesColor','threadsOn','threadsType','threadsAmount','threadsWeight','frameStyle','frameCount','frameThick','frameColor','palColors','palBg','palLight','seed'];
+  exportConfig(){ const s=this.state, o={}; this.CONFIG_KEYS.forEach(k=>o[k]=s[k]); return o; }
+  readHash(){ try{ const h=location.hash.replace(/^#/,''); if(!h) return null; const o=JSON.parse(decodeURIComponent(escape(atob(h)))); return o; }catch(e){ return null; } }
+
+  up(patch){ this.setState(patch,()=>{ try{ if(!this.state.animOn) this.paint(); }catch(e){ console.error(e); } }); }
+  componentDidMount(){ try{ this.paint(); }catch(e){ console.error(e); } }
+  componentWillUnmount(){ this.stopAnim(); }
+  componentDidUpdate(prevProps,prevState){
+    if(this.state.showVar && (!prevState || !prevState.showVar)){ try{ this.paintVariations(); }catch(e){} }
+  }
+
+  // ---------- style helpers ----------
+  seg(active){ const base={padding:'8px 11px',fontFamily:"'IBM Plex Mono',monospace",fontSize:'11px',letterSpacing:'.05em',textTransform:'uppercase',cursor:'pointer',borderRadius:'2px'};
+    return active?{...base,border:'1px solid #f4f4f0',background:'#f4f4f0',color:'#0a0a0c'}:{...base,border:'1px solid #26262c',background:'transparent',color:'#cfcfd6'}; }
+  segS(active){ const base={flex:'1',padding:'8px 0',fontFamily:"'IBM Plex Mono',monospace",fontSize:'11px',cursor:'pointer',borderRadius:'2px'};
+    return active?{...base,border:'1px solid #f4f4f0',background:'#f4f4f0',color:'#0a0a0c'}:{...base,border:'1px solid #26262c',background:'transparent',color:'#cfcfd6'}; }
+  tabS(active){ const base={padding:'6px 9px',fontFamily:"'IBM Plex Mono',monospace",fontSize:'10px',letterSpacing:'.05em',textTransform:'uppercase',cursor:'pointer',borderRadius:'2px',border:'1px solid transparent'};
+    return active?{...base,background:'#1a1a1f',color:'#f4f4f0',border:'1px solid #2a2a30'}:{...base,background:'transparent',color:'#7a7a82'}; }
+  chip(active){ const base={padding:'7px 11px',fontFamily:"'IBM Plex Mono',monospace",fontSize:'10.5px',letterSpacing:'.05em',cursor:'pointer',borderRadius:'2px'};
+    return active?{...base,border:'1px solid #e8112d',background:'rgba(232,17,45,.14)',color:'#f4f4f0'}:{...base,border:'1px solid #26262c',background:'transparent',color:'#8c8c95'}; }
+  toggle(on){ const base={padding:'5px 12px',fontFamily:"'IBM Plex Mono',monospace",fontSize:'10px',letterSpacing:'.08em',cursor:'pointer',borderRadius:'2px'};
+    return on?{...base,border:'1px solid #34c759',background:'rgba(52,199,89,.16)',color:'#aef0c2'}:{...base,border:'1px solid #26262c',background:'transparent',color:'#7a7a82'}; }
+  pan(active){ return active?{display:'flex',flexDirection:'column',gap:'15px'}:{display:'none'}; }
+
+  setPreset(name){ const p=this.PRESETS[name]; const light=p.colors.find(c=>/f4|ff|ec|e9|e8d|fff/i.test(c))||'#f4f4f0';
+    this.up({palColors:p.colors.slice(), palBg:p.bg, palLight:light}); }
+
+  // ---------- render ----------
+  renderVals(){
+    const s=this.state; const num=e=>parseInt(e.target.value,10);
+    const dims=this.geom(this.cfg());
+    return {
+      canvasRef:this.canvasRef, fileRef:this.fileRef,
+      v0:this.varRefs[0],v1:this.varRefs[1],v2:this.varRefs[2],v3:this.varRefs[3],v4:this.varRefs[4],v5:this.varRefs[5],v6:this.varRefs[6],v7:this.varRefs[7],v8:this.varRefs[8],
+      seedHex:('0000000'+(s.seed>>>0).toString(16)).slice(-7).toUpperCase(),
+      modeLabel:s.mode.toUpperCase(), symLabel:('SYM '+s.sym).toUpperCase(), shapeLabel:s.shapeMask.toUpperCase(), dimLabel:dims.cols+'×'+dims.rows,
+      // values
+      grain:s.grain, voidness:s.voidness, contrast:s.contrast, aspect:s.aspect, shapeMask:s.shapeMask, sym:s.sym,
+      glyphAmount:s.glyphAmount, glyphAccent:s.glyphAccent, slashAmount:s.slashAmount,
+      pipesStyle:s.pipesStyle, pipesAmount:s.pipesAmount, pipesWeight:s.pipesWeight, pipesColor:s.pipesColor,
+      threadsType:s.threadsType, threadsAmount:s.threadsAmount, threadsWeight:s.threadsWeight,
+      frameStyle:s.frameStyle, frameCount:s.frameCount, frameThick:s.frameThick, frameColor:s.frameColor,
+      palColors:s.palColors, palBg:s.palBg, copyLbl:s.copyLbl,
+      glyphOnLbl:s.glyphOn?'ON':'OFF', slashOnLbl:s.slashOn?'ON':'OFF', pipesOnLbl:s.pipesOn?'ON':'OFF', threadsOnLbl:s.threadsOn?'ON':'OFF',
+      // mode styles
+      sMDrift:this.seg(s.mode==='drift'), sMMandala:this.seg(s.mode==='mandala'), sMStrata:this.seg(s.mode==='strata'), sMRings:this.seg(s.mode==='rings'), sMSpiral:this.seg(s.mode==='spiral'),
+      // tab styles + panels
+      sTField:this.tabS(s.tab==='field'), sTShapes:this.tabS(s.tab==='shapes'), sTPipes:this.tabS(s.tab==='pipes'), sTLines:this.tabS(s.tab==='lines'), sTFrame:this.tabS(s.tab==='frame'), sTColor:this.tabS(s.tab==='color'), sTExport:this.tabS(s.tab==='export'), sTMotion:this.tabS(s.tab==='motion'),
+      panField:this.pan(s.tab==='field'), panShapes:this.pan(s.tab==='shapes'), panPipes:this.pan(s.tab==='pipes'), panLines:this.pan(s.tab==='lines'), panFrame:this.pan(s.tab==='frame'), panColor:this.pan(s.tab==='color'), panExport:this.pan(s.tab==='export'), panMotion:this.pan(s.tab==='motion'),
+      animSpeed:s.animSpeed, animOnLbl:s.animOn?'❚❚ Pause':'▶ Play',
+      sAnimBtn:{width:'100%',padding:'13px',background:s.animOn?'#34c759':'#e8112d',color:s.animOn?'#06210f':'#fff',border:'none',fontFamily:"'IBM Plex Mono',monospace",fontSize:'12px',fontWeight:'600',letterSpacing:'.1em',textTransform:'uppercase',cursor:'pointer'},
+      sAnimChurn:this.toggle(s.animChurn), sAnimRotate:this.toggle(s.animRotate), sAnimFlow:this.toggle(s.animFlow), sThreadMove:this.toggle(s.animThreadMove),
+      churnLbl:s.animChurn?'ON':'OFF', rotateLbl:s.animRotate?'ON':'OFF', flowLbl:s.animFlow?'ON':'OFF', threadMoveLbl:s.animThreadMove?'ON':'OFF',
+      recLbl:s.recording?'● Recording…':'● Record loop (WebM)',
+      tMotion:()=>this.up({tab:'motion'}), toggleAnim:()=>this.toggleAnim(), onAnimSpeed:e=>this.up({animSpeed:num(e)}),
+      tgChurn:()=>this.up({animChurn:!s.animChurn}), tgRotate:()=>this.up({animRotate:!s.animRotate}), tgFlow:()=>this.up({animFlow:!s.animFlow}), tgThreadMove:()=>this.up({animThreadMove:!s.animThreadMove}),
+      recordLoop:()=>this.recordLoop(),
+      exportGif:()=>this.exportGif(),
+      gifLbl: s.gifBusy ? ('● Rendering '+Math.round(s.gifProg*100)+'%') : '◆ Export loop (GIF)',
+      gifTurns:s.gifTurns, onTurns:e=>this.up({gifTurns:e.target.value}),
+      sGrainAnim:this.toggle(s.grainAnim), grainAnimLbl:s.grainAnim?'ON':'OFF', tgGrainAnim:()=>this.up({grainAnim:!s.grainAnim}),
+      grainTarget:s.grainTarget, onGrainTarget:e=>this.up({grainTarget:num(e)}),
+      // toggles + chips + stack
+      sGlyphOn:this.toggle(s.glyphOn), sSlashOn:this.toggle(s.slashOn), sPipesOn:this.toggle(s.pipesOn), sThreadsOn:this.toggle(s.threadsOn),
+      sStk1:this.segS(s.glyphStack===1), sStk2:this.segS(s.glyphStack===2), sStk3:this.segS(s.glyphStack===3),
+      sSetBasic:this.chip(s.setBasic), sSetFrames:this.chip(s.setFrames), sSetTexture:this.chip(s.setTexture), sSetGeo:this.chip(s.setGeo),
+      varOverlay: s.showVar?{position:'absolute',inset:'0',background:'rgba(5,5,7,.86)',display:'flex',alignItems:'center',justifyContent:'center',zIndex:20}:{display:'none'},
+      // handlers: modes
+      mDrift:()=>this.up({mode:'drift',sym:'none'}), mMandala:()=>this.up({mode:'mandala',sym:'8'}), mStrata:()=>this.up({mode:'strata',sym:'none'}), mRings:()=>this.up({mode:'rings',sym:'mirror'}), mSpiral:()=>this.up({mode:'spiral',sym:'none'}),
+      // tabs
+      tField:()=>this.up({tab:'field'}), tShapes:()=>this.up({tab:'shapes'}), tPipes:()=>this.up({tab:'pipes'}), tLines:()=>this.up({tab:'lines'}), tFrame:()=>this.up({tab:'frame'}), tColor:()=>this.up({tab:'color'}), tExport:()=>this.up({tab:'export'}),
+      // field
+      onAspect:e=>this.up({aspect:e.target.value}), onShape:e=>this.up({shapeMask:e.target.value}), onSym:e=>this.up({sym:e.target.value}),
+      onGrain:e=>this.up({grain:num(e)}), onVoid:e=>this.up({voidness:num(e)}), onContrast:e=>this.up({contrast:num(e)}),
+      // shapes
+      tgGlyph:()=>this.up({glyphOn:!s.glyphOn}), onGlyphAmt:e=>this.up({glyphAmount:num(e)}), onGlyphAcc:e=>this.up({glyphAccent:num(e)}),
+      stk1:()=>this.up({glyphStack:1}), stk2:()=>this.up({glyphStack:2}), stk3:()=>this.up({glyphStack:3}),
+      setBasic:()=>this.up({setBasic:!s.setBasic}), setFrames:()=>this.up({setFrames:!s.setFrames}), setTexture:()=>this.up({setTexture:!s.setTexture}), setGeo:()=>this.up({setGeo:!s.setGeo}),
+      tgSlash:()=>this.up({slashOn:!s.slashOn}), onSlashAmt:e=>this.up({slashAmount:num(e)}),
+      // pipes
+      tgPipes:()=>this.up({pipesOn:!s.pipesOn}), onPipeStyle:e=>this.up({pipesStyle:e.target.value}), onPipeAmt:e=>this.up({pipesAmount:num(e)}), onPipeW:e=>this.up({pipesWeight:num(e)}), onPipeColor:e=>this.up({pipesColor:e.target.value}),
+      // lines
+      tgThreads:()=>this.up({threadsOn:!s.threadsOn}), onThreadType:e=>this.up({threadsType:e.target.value}), onThreadAmt:e=>this.up({threadsAmount:num(e)}), onThreadW:e=>this.up({threadsWeight:num(e)}),
+      // frame
+      onFrameStyle:e=>this.up({frameStyle:e.target.value}), onFrameCount:e=>this.up({frameCount:num(e)}), onFrameThick:e=>this.up({frameThick:num(e)}), onFrameColor:e=>this.up({frameColor:e.target.value}),
+      // color
+      pPrimary:()=>this.setPreset('primary'), pEmber:()=>this.setPreset('ember'), pFrost:()=>this.setPreset('frost'), pPop:()=>this.setPreset('pop'), pEarth:()=>this.setPreset('earth'), pMono:()=>this.setPreset('mono'),
+      harmonize:()=>{ const base=Math.random()*360; const schemes=[[0,120,240],[0,150,210],[0,30,180,210],[0,90,180,270]]; const sc=schemes[(Math.random()*schemes.length)|0];
+        const cols=sc.map((d,i)=>this.hslToHex((base+d)%360, 62+Math.random()*22, 46+Math.random()*16)); cols.push('#f4f4f0'); this.up({palColors:cols,palLight:'#f4f4f0'}); },
+      onPalColor:e=>{ const i=+e.target.dataset.i; const arr=s.palColors.slice(); arr[i]=e.target.value; this.up({palColors:arr}); },
+      onPalRemove:e=>{ const i=+e.currentTarget.dataset.i; if(s.palColors.length<=2)return; const arr=s.palColors.slice(); arr.splice(i,1); this.up({palColors:arr}); },
+      onPalAdd:()=>{ const arr=s.palColors.slice(); arr.push(this.hslToHex((Math.random()*360)|0,70,52)); this.up({palColors:arr}); },
+      onBgColor:e=>this.up({palBg:e.target.value}),
+      // generate / mutate / variations
+      regen:()=>this.up({seed:(Math.random()*1e9)|0}),
+      mutate:()=>{ const j=(k,a,b)=>this.clamp(Math.round(s[k]+(Math.random()*2-1)*((b-a)*0.12)),a,b);
+        this.up({seed:(s.seed+ (Math.random()*9999|0) +1)|0, voidness:j('voidness',0,100), glyphAmount:j('glyphAmount',0,100), contrast:j('contrast',0,100), threadsAmount:j('threadsAmount',0,100)}); },
+      openVar:()=>this.up({showVar:true}), closeVar:()=>this.up({showVar:false}),
+      pickVar:e=>{ const sd=e.currentTarget.dataset.seed; if(sd) this.up({seed:(+sd)|0, showVar:false}); },
+      // export
+      dlPng:()=>{ const cv=this.canvasRef.current; if(!cv)return; cv.toBlob(b=>{ const a=document.createElement('a'); a.href=URL.createObjectURL(b); a.download='tapestry-'+(s.seed>>>0).toString(16)+'.png'; a.click(); setTimeout(()=>URL.revokeObjectURL(a.href),1000); }); },
+      dlSvg:()=>{ const svg=this.buildSVG(); const blob=new Blob([svg],{type:'image/svg+xml'}); const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download='tapestry-'+(s.seed>>>0).toString(16)+'.svg'; a.click(); setTimeout(()=>URL.revokeObjectURL(a.href),1000); },
+      copyLink:()=>{ const cfg=this.exportConfig(); const h=btoa(unescape(encodeURIComponent(JSON.stringify(cfg)))); const url=location.origin+location.pathname+'#'+h;
+        try{ history.replaceState(null,'','#'+h); }catch(e){} if(navigator.clipboard){ navigator.clipboard.writeText(url).then(()=>{ this.up({copyLbl:'Copied!'}); setTimeout(()=>this.up({copyLbl:'Copy link'}),1400); }); } else { this.up({copyLbl:'In URL bar'}); } },
+      saveJson:()=>{ const blob=new Blob([JSON.stringify(this.exportConfig(),null,2)],{type:'application/json'}); const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download='tapestry-config.json'; a.click(); setTimeout(()=>URL.revokeObjectURL(a.href),1000); },
+      loadJsonClick:()=>{ if(this.fileRef.current) this.fileRef.current.click(); },
+      onLoadJson:e=>{ const f=e.target.files&&e.target.files[0]; if(!f)return; const rd=new FileReader(); rd.onload=()=>{ try{ const o=JSON.parse(rd.result); this.up(o); }catch(err){ console.error(err); } }; rd.readAsText(f); },
+    };
+  }
+
+  buildSVG(){
+    const cfg=this.cfg(); const G=this.geom(cfg);
+    const parts=[]; const sink=this.svgSink(parts);
+    this.generate(sink, cfg);
+    const clip=this.svgClipPath(this.maskShapeDesc(cfg,G.W,G.H));
+    return `<svg xmlns="http://www.w3.org/2000/svg" width="${G.W}" height="${G.H}" viewBox="0 0 ${G.W} ${G.H}"><defs><clipPath id="mask">${clip}</clipPath></defs>${parts.join('')}</svg>`;
+  }
+}
+</script>
+</body>
+</html>
