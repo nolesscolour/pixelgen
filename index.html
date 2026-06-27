@@ -748,7 +748,7 @@ class Component extends DCLogic {
     const rotSpan=this.state.animRotate ? turns*2*Math.PI : 0;
     const enc=GIFEncoder();
     const G0=this.geom(base);
-    const SW=Math.min(G0.W,460), SH=Math.round(G0.H*SW/G0.W);
+    const SW=Math.min(G0.W,860), SH=Math.round(G0.H*SW/G0.W);
     const oc=document.createElement('canvas');
     const sc=document.createElement('canvas'); sc.width=SW; sc.height=SH;
     const sctx=sc.getContext('2d'); sctx.imageSmoothingEnabled=false;
